@@ -10,6 +10,7 @@ class ProductDetailsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final shop = Provider.of<ShopProvider>(context);
+    final isFav = shop.isProductFavorite(product.id);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F2ED),
@@ -21,11 +22,10 @@ class ProductDetailsPage extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
-          
           IconButton(
             icon: Icon(
-              product.isFavorite ? Icons.favorite : Icons.favorite_border,
-              color: product.isFavorite ? Colors.red : const Color(0xFF4A3428),
+              isFav ? Icons.favorite : Icons.favorite_border,
+              color: isFav ? Colors.red : const Color(0xFF4A3428),
             ),
             onPressed: () => shop.toggleFavoriteStatus(product.id),
           ),
@@ -46,7 +46,7 @@ class ProductDetailsPage extends StatelessWidget {
                     fit: BoxFit.cover,
                   ),
                   boxShadow: [
-                    BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 20, offset: const Offset(0, 10))
+                    BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 20, offset: const Offset(0, 10))
                   ],
                 ),
               ),

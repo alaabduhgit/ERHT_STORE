@@ -72,7 +72,7 @@ class CartPage extends StatelessWidget {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: const Text('شكراً لثقتك بـ إرث! تم استلام طلبك بنجاح', textAlign: TextAlign.center),
-                          backgroundColor: Colors.green[800],
+                          backgroundColor:Color(0xFF8B5E3C),
                           behavior: SnackBarBehavior.floating,
                           margin: const EdgeInsets.all(50),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
