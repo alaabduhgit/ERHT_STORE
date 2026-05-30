@@ -22,7 +22,10 @@ class _SignInScreenState extends State<SignInScreen> {
 
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('الرجاء ملء جميع الحقول')),
+        const SnackBar(
+          content: Text('الرجاء ملء جميع الحقول المطلوبة', textAlign: TextAlign.center),
+          behavior: SnackBarBehavior.floating,
+        ),
       );
       return;
     }
@@ -44,12 +47,16 @@ class _SignInScreenState extends State<SignInScreen> {
     } on FirebaseAuthException catch (e) {
       String message = 'حدث خطأ ما، يرجى المحاولة لاحقاً';
       if (e.code == 'user-not-found') message = 'هذا الحساب غير موجود';
-      if (e.code == 'wrong-password') message = 'كلمة المرور خاطئة';
+      if (e.code == 'wrong-password') message = 'كلمة المرور التي أدخلتها خاطئة';
       if (e.code == 'email-already-in-use') message = 'البريد الإلكتروني مستخدم بالفعل';
-      if (e.code == 'weak-password') message = 'كلمة المرور ضعيفة جداً';
+      if (e.code == 'weak-password') message = 'كلمة المرور ضعيفة جداً، اختر كلمة أقوى';
+      if (e.code == 'invalid-email') message = 'صيغة البريد الإلكتروني غير صحيحة';
       
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message)),
+        SnackBar(
+          content: Text(message, textAlign: TextAlign.center),
+          behavior: SnackBarBehavior.floating,
+        ),
       );
     } finally {
       setState(() => _isLoading = false);
@@ -85,7 +92,7 @@ class _SignInScreenState extends State<SignInScreen> {
               width: 360,
               padding: const EdgeInsets.all(30),
               decoration: BoxDecoration(
-                color: Colors.white, // 🌟 
+                color: Colors.white, 
                 borderRadius: BorderRadius.circular(30),
                 boxShadow: [
                   BoxShadow(
@@ -113,52 +120,36 @@ class _SignInScreenState extends State<SignInScreen> {
                   const SizedBox(height: 25),
                   
                   Text(
-                    _isSignUp ? "Create Account" : "Login",
-                    style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Color(0xFF8B5E3C)), // تعديل للون البني
+                    _isSignUp ? "إنشاء حساب جديد" : "تسجيل الدخول",
+                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF8B5E3C)),
                   ),
                   const SizedBox(height: 30),
                   
-                  // حقل إدخال الإيميل
-                  _buildTextField("Email ID", "Enter your email", _emailController),
+                  // حقل البريد الإلكتروني مع دعم المحاذاة اليمينية
+                  _buildTextField(
+                    "البريد الإلكتروني", 
+                    "أدخل بريدك الإلكتروني", 
+                    _emailController,
+                    textDirection: TextDirection.ltr, // ليبقى الإيميل يكتب بشكل صحيح من اليسار لليمين
+                  ),
                   const SizedBox(height: 20),
                   
-                  // حقل إدخال كلمة المرور
-                  _buildTextField("Password", "Enter your password", _passwordController, isPass: true),
-                  const SizedBox(height: 15),
+                  // حقل كلمة المرور
+                  _buildTextField(
+                    "كلمة المرور", 
+                    "أدخل كلمة المرور الخاصة بك", 
+                    _passwordController, 
+                    isPass: true,
+                    textDirection: TextDirection.ltr,
+                  ),
                   
-                  // خيارات التذكر ونسيان كلمة السر (تظهر في حالة تسجيل الدخول فقط)
-                  if (!_isSignUp)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            SizedBox(
-                              width: 24,
-                              child: Checkbox(
-                                value: true, 
-                                onChanged: (v){}, 
-                                activeColor: const Color(0xFF8B5E3C),
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            const Text("Remember me", style: TextStyle(color: Color(0xFF8B5E3C), fontSize: 12)), // تعديل للون البني
-                          ],
-                        ),
-                        TextButton(
-                          onPressed: (){}, 
-                          child: const Text("Forgot Password?", style: TextStyle(color: Color(0xFF8B5E3C), fontSize: 12)), // تعديل للون البني
-                        ),
-                      ],
-                    ),
-                  
-                  const SizedBox(height: 25),
+                  const SizedBox(height: 35), // مسافة إضافية منسقة لتعويض الجزء المحذوف
                   
                   _isLoading 
                   ? const CircularProgressIndicator(color: Color(0xFF8B5E3C))
                   : SizedBox(
                       width: double.infinity,
-                      height: 50,
+                      height: 52,
                       child: ElevatedButton(
                         onPressed: _submit,
                         style: ElevatedButton.styleFrom(
@@ -167,13 +158,13 @@ class _SignInScreenState extends State<SignInScreen> {
                           elevation: 0,
                         ),
                         child: Text(
-                          _isSignUp ? "Sign Up" : "Login", 
+                          _isSignUp ? "إنشاء حساب" : "دخول", 
                           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                         ),
                       ),
                     ),
                   
-                  const SizedBox(height: 15),
+                  const SizedBox(height: 20),
                   
                   TextButton(
                     onPressed: () {
@@ -182,8 +173,8 @@ class _SignInScreenState extends State<SignInScreen> {
                       });
                     },
                     child: Text(
-                      _isSignUp ? "Already have an account? Login" : "Don't have an account? Sign Up",
-                      style: const TextStyle(color: Color(0xFF8B5E3C), fontWeight: FontWeight.w500), // تعديل للون البني
+                      _isSignUp ? "لديك حساب بالفعل؟ سجل دخولك" : "ليس لديك حساب؟ سجل معنا الآن",
+                      style: const TextStyle(color: Color(0xFF8B5E3C), fontWeight: FontWeight.w600, fontSize: 14),
                     ),
                   ),
                 ],
@@ -195,26 +186,33 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
-  Widget _buildTextField(String label, String hint, TextEditingController controller, {bool isPass = false}) {
+  Widget _buildTextField(String label, String hint, TextEditingController controller, {bool isPass = false, TextDirection? textDirection}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(color: Color(0xFF8B5E3C), fontWeight: FontWeight.w500, fontSize: 14)), // تعديل للون البني
+        // محاذاة النص التوضيحي لليمين ليتناسب مع اللغة العربية
+        Align(
+          alignment: Alignment.topRight,
+          child: Text(label, style: const TextStyle(color: Color(0xFF8B5E3C), fontWeight: FontWeight.w600, fontSize: 14)),
+        ),
         const SizedBox(height: 8),
         TextField(
           controller: controller,
           obscureText: isPass,
-          style: const TextStyle(color: Color(0xFF4A3428)), // لون النص المكتوب بني غامق
+          textDirection: textDirection,
+          textAlign: textDirection == TextDirection.ltr ? TextAlign.left : TextAlign.right,
+          style: const TextStyle(color: Color(0xFF4A3428)), 
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TextStyle(color: const Color(0xFF4A3428).withValues(alpha: 0.4), fontSize: 14), // تعديل للون التلميح
+            hintStyle: TextStyle(color: const Color(0xFF4A3428).withValues(alpha: 0.4), fontSize: 14), 
+            hintTextDirection: TextDirection.rtl, // اتجاه التلميح الافتراضي عربي
             filled: true,
-            fillColor: const Color(0xFFF5F2ED), // جعل خلفية الحقول بيج فاتح لتتناسق مع الخلفية العامة للموقع
+            fillColor: const Color(0xFFF5F2ED), 
             contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(15), 
-              borderSide: const BorderSide(color: Color(0xFF8B5E3C)),
+              borderSide: const BorderSide(color: Color(0xFF8B5E3C), width: 1.5),
             ),
           ),
         ),
